@@ -1,11 +1,14 @@
 from flask import Flask, request, jsonify, render_template
 import pickle
 import numpy as np
+import os
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
 # Load model
-with open("model.pkl", "rb") as f:
+with open(os.path.join(BASE_DIR, "model.pkl"), "rb") as f:
     model = pickle.load(f)
 
 # Class labels
