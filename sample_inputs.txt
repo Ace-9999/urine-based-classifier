@@ -1,0 +1,53 @@
+DEHYDRATION:
+    25,   # age
+    70,   # bp
+    1.005, # VERY LOW sg → dehydration
+    0,    # al
+    0,    # su
+    0,0,0,0,
+    80,   # LOW bgr
+    15,   # LOW bu
+    0.7,  # LOW sc
+    130,  # slightly low sodium
+    3.5,  # slightly low potassium
+    11,   # LOW hemo → weak condition
+    35,   # low pcv
+    6000, # lower wc
+    4.5,  # rc
+    0,0,0,0,0,0,0
+
+NORMAL:
+    25,   # age
+    70,   # bp
+    1.005, # sg (VERY LOW → strong dehydration)
+    0,    # al (force safe)
+    0,    # su
+    0,0,0,0,
+    90,   # bgr (safe)
+    20,   # bu (safe)
+    0.8,  # sc (VERY safe)
+    135,  # sodium
+    4.0,  # potassium
+    15,   # hemo
+    45,   # pcv
+    7000, # wc
+    5.0,  # rc
+    0,0,0,0,0,0,0
+
+KIDNEY STRESS:
+    30,   # age
+    80,   # bp
+    1.010, # sg (LOW → dehydration trigger)
+    0,    # al (normal)
+    0,    # su (normal)
+    0,0,0,0,
+    100,  # bgr (normal)
+    25,   # bu (normal)
+    1.0,  # sc (normal)
+    138,  # sodium
+    4.0,  # potassium
+    14,   # hemo
+    42,   # pcv
+    7500, # wc
+    5.0,  # rc
+    0,0,0,0,0,0,0

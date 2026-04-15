@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UrineIQ — Urine Health Analyzer</title>
+  <meta name="description" content="Urine health analyzer that predicts health conditions and provides personalized diet recommendations based on urine biomarkers."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base: #0c0a04;
+      --bg-card: rgba(255,255,255,0.04);
+      --bg-card-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-focus: rgba(251,191,36,0.5);
+      --text-primary: #fdf8ed;
+      --text-secondary: #b8a888;
+      --text-muted: #6e5e3e;
+      --accent:       #fbbf24;
+      --accent-deep:  #d97706;
+      --accent-light: #fde68a;
+      --accent-warm:  #f59e0b;
+      --accent-ember: #b45309;
+      --gradient-btn: linear-gradient(135deg, #f59e0b, #d97706);
+      --gradient-hero: linear-gradient(135deg, #0c0a04 0%, #110e03 50%, #0c0a04 100%);
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.5);
+      --shadow-glow: 0 0 40px rgba(251,191,36,0.12);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ─── ANIMATED BACKGROUND ORBS ─── */
+    .bg-orbs {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(110px); opacity: 0.10;
+      animation: float 22s ease-in-out infinite;
+    }
+    .orb-1 { width: 600px; height: 600px; background: #f59e0b; top: -200px; left: -200px; animation-delay: 0s; }
+    .orb-2 { width: 450px; height: 450px; background: #d97706; top: 300px; right: -180px; animation-delay: -8s; }
+    .orb-3 { width: 380px; height: 380px; background: #fbbf24; bottom: -80px; left: 30%; animation-delay: -15s; }
+    @keyframes float {
+      0%,100% { transform: translateY(0) scale(1); }
+      33% { transform: translateY(-28px) scale(1.05); }
+      66% { transform: translateY(18px) scale(0.97); }
+    }
+
+    /* ─── LAYOUT ─── */
+    .container { position: relative; max-width: 1100px; margin: 0 auto; padding: 0 24px; z-index: 1; }
+
+    /* ─── HEADER ─── */
+    header { padding: 28px 0 20px; border-bottom: 1px solid var(--border); }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: var(--gradient-btn);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 15px rgba(251,191,36,0.3);
+    }
+    .logo-text {
+      font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700;
+      background: linear-gradient(135deg, #fdf8ed, #fbbf24);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .logo-tagline { font-size: 11px; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    .badge {
+      font-size: 11px; padding: 5px 12px; border-radius: 50px;
+      background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2);
+      color: #fbbf24; font-weight: 500; letter-spacing: 0.04em;
+    }
+
+    /* ─── HERO ─── */
+    .hero { text-align: center; padding: 64px 0 44px; }
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 50px;
+      background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.18);
+      font-size: 13px; color: #fbbf24; margin-bottom: 26px; animation: fadeIn 0.6s ease;
+    }
+    .hero-pill .dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+      animation: pulse-dot 1.5s ease infinite;
+    }
+    @keyframes pulse-dot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.75); } }
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(34px, 5.5vw, 56px); font-weight: 700; line-height: 1.1;
+      margin-bottom: 18px; animation: fadeUp 0.7s ease 0.1s both;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 17px; color: var(--text-secondary); max-width: 520px;
+      margin: 0 auto 38px; animation: fadeUp 0.7s ease 0.2s both; line-height: 1.7;
+    }
+    .stats-row {
+      display: flex; align-items: center; justify-content: center; gap: 40px;
+      animation: fadeUp 0.7s ease 0.3s both;
+    }
+    .stat { text-align: center; }
+    .stat-val {
+      font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700;
+      background: var(--gradient-btn); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .stat-divider { width: 1px; height: 38px; background: var(--border); }
+
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ─── FORM CARD ─── */
+    .form-section { padding: 0 0 60px; }
+    .form-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px;
+      padding: 40px 44px; backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card); transition: box-shadow var(--transition);
+    }
+    .form-card:hover { box-shadow: var(--shadow-glow); }
+
+    /* ─── TAB SWITCHER ─── */
+    .tab-bar {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 12px; padding: 4px; margin-bottom: 36px; width: fit-content;
+    }
+    .tab-btn {
+      padding: 10px 22px; border-radius: 9px; border: none; background: transparent;
+      color: var(--text-muted); font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background var(--transition), color var(--transition);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tab-btn.active {
+      background: var(--gradient-btn); color: #0c0a04;
+      box-shadow: 0 2px 12px rgba(251,191,36,0.3);
+    }
+    .tab-btn:not(.active):hover { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeUp 0.35s ease; }
+
+    /* ─── SECTION HEADER ─── */
+    .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+    .section-icon {
+      width: 42px; height: 42px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center; font-size: 19px;
+    }
+    .section-icon.yellow { background: rgba(251,191,36,0.14); }
+    .section-icon.amber  { background: rgba(245,158,11,0.14); }
+    .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; }
+    .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ─── FORM DIVIDER ─── */
+    .form-divider {
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text-muted); padding: 8px 0; margin: 22px 0 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .form-divider::before {
+      content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--gradient-btn);
+    }
+
+    /* ─── FIELDS ─── */
+    .fields-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr)); gap: 15px; }
+    .fields-grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px,1fr)); gap: 15px; }
+    .field-group { display: flex; flex-direction: column; gap: 7px; }
+    label {
+      font-size: 11.5px; font-weight: 600; color: var(--text-secondary);
+      letter-spacing: 0.04em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 5px;
+    }
+    label .tip {
+      width: 15px; height: 15px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      font-size: 9px; display: inline-flex; align-items: center; justify-content: center;
+      color: var(--text-muted); cursor: help; position: relative;
+    }
+    label .tip:hover::after {
+      content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%); background: #1a1400; color: var(--text-primary);
+      font-size: 11px; padding: 6px 10px; border-radius: 8px; white-space: nowrap;
+      border: 1px solid var(--border); font-weight: 400; letter-spacing: 0;
+      text-transform: none; z-index: 10;
+    }
+    input[type="number"], select, textarea {
+      width: 100%; padding: 11px 13px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-primary);
+      font-size: 14px; font-family: 'Inter', sans-serif;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent); background: rgba(251,191,36,0.05);
+      box-shadow: 0 0 0 3px rgba(251,191,36,0.1);
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+    select { cursor: pointer; -moz-appearance: none; -webkit-appearance: none; appearance: none; }
+    select option { background: #130f02; }
+
+    /* ─── RAW INPUT ─── */
+    .raw-panel-inner { display: flex; flex-direction: column; gap: 16px; }
+    .raw-textarea {
+      font-family: 'Courier New', monospace; font-size: 13.5px; line-height: 1.7;
+      min-height: 320px; resize: vertical; padding: 18px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(251,191,36,0.2);
+      border-radius: var(--radius-sm); color: #fde68a;
+      scrollbar-width: thin;
+    }
+    .raw-textarea:focus { border-color: var(--accent); }
+    .raw-help {
+      background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.12);
+      border-radius: var(--radius-sm); padding: 14px 18px;
+    }
+    .raw-help-title { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .raw-fields-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 5px 20px;
+    }
+    .raw-field-item { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; }
+    .raw-field-idx { color: var(--accent-deep); font-weight: 700; font-family: monospace; width: 24px; flex-shrink: 0; }
+
+    /* ─── BUTTONS ─── */
+    .btn-row { margin-top: 32px; display: flex; gap: 12px; align-items: center; }
+    .btn-analyze {
+      flex: 1; padding: 15px 28px; border: none; border-radius: var(--radius-sm);
+      background: var(--gradient-btn); color: #0c0a04;
+      font-size: 15px; font-weight: 700; font-family: 'Inter', sans-serif;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
+      position: relative; overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 20px rgba(251,191,36,0.3);
+    }
+    .btn-analyze::before {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(255,255,255,0); transition: background var(--transition);
+    }
+    .btn-analyze:hover::before { background: rgba(255,255,255,0.12); }
+    .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(251,191,36,0.4); }
+    .btn-analyze:active { transform: translateY(0); }
+    .btn-reset {
+      padding: 15px 20px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: transparent; color: var(--text-secondary); font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .btn-reset:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+
+    .spinner {
+      width: 18px; height: 18px; border: 2px solid rgba(12,10,4,0.3);
+      border-top-color: #0c0a04; border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading .btn-text { display: none; }
+    .loading .spinner { display: block; }
+
+    /* ─── RESULT SECTION ─── */
+    #result-section { margin-top: 40px; display: none; animation: slideUp 0.5s ease; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+
+    .result-banner {
+      border-radius: 20px; padding: 30px 34px;
+      border: 1px solid; margin-bottom: 24px; position: relative; overflow: hidden;
+    }
+    .result-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .result-label-wrap { display: flex; align-items: center; gap: 16px; }
+    .result-emoji { font-size: 48px; line-height: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); }
+    .result-condition { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; }
+    .result-risk-badge {
+      font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 50px;
+      border: 1px solid; margin-top: 6px; display: inline-block;
+    }
+    .result-desc { font-size: 15px; color: var(--text-secondary); margin-top: 12px; line-height: 1.65; max-width: 620px; }
+
+    /* ─── PROBABILITY BARS ─── */
+    .prob-section {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 26px 30px; margin-bottom: 24px;
+    }
+    .prob-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.07em; }
+    .prob-bars { display: flex; flex-direction: column; gap: 13px; }
+    .prob-bar-row { display: grid; grid-template-columns: 155px 1fr 52px; align-items: center; gap: 13px; }
+    .prob-bar-label { font-size: 13px; color: var(--text-secondary); }
+    .prob-bar-track { height: 7px; background: rgba(255,255,255,0.06); border-radius: 50px; overflow: hidden; }
+    .prob-bar-fill { height: 100%; border-radius: 50px; background: var(--gradient-btn); transition: width 1s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+    .prob-bar-pct { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: right; }
+
+    /* ─── DIET SECTION ─── */
+    .diet-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 30px; }
+    .diet-header { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+    .diet-icon-wrap {
+      width: 46px; height: 46px; background: rgba(251,191,36,0.12);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .diet-title { font-family: 'Space Grotesk', sans-serif; font-size: 19px; font-weight: 700; }
+    .diet-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .diet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 12px; }
+    .diet-item {
+      display: flex; align-items: flex-start; gap: 11px;
+      padding: 13px 15px; border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+      font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+      animation: dietIn 0.4s ease both;
+    }
+    .diet-item:hover {
+      background: rgba(251,191,36,0.05); border-color: rgba(251,191,36,0.15); transform: translateX(4px);
+    }
+    @keyframes dietIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ─── DISCLAIMER ─── */
+    .disclaimer {
+      margin-top: 22px; padding: 14px 18px; border-radius: var(--radius-sm);
+      background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.14);
+      font-size: 13px; color: #937030;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .disclaimer-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ─── CREATED BY SECTION ─── */
+    .created-by {
+      border-top: 1px solid var(--border);
+      padding: 60px 0 70px;
+      text-align: center;
+    }
+    .created-by-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--text-muted); margin-bottom: 36px; font-weight: 600;
+    }
+    .creators-row {
+      display: flex; justify-content: center; gap: 64px; flex-wrap: wrap;
+    }
+    .creator-card {
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .creator-avatar {
+      width: 100px; height: 100px; border-radius: 50%;
+      border: 2px solid rgba(251,191,36,0.25);
+      background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      overflow: hidden;
+      position: relative;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .creator-avatar:hover {
+      border-color: rgba(251,191,36,0.55);
+      box-shadow: 0 0 20px rgba(251,191,36,0.15);
+    }
+    .creator-avatar img {
+      width: 100%; height: 100%; object-fit: cover;
+      position: absolute; inset: 0;
+    }
+    .creator-avatar-placeholder {
+      font-size: 36px;
+      user-select: none;
+    }
+    .creator-upload-hint {
+      position: absolute; inset: 0;
+      background: rgba(12,10,4,0.6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: var(--accent);
+      opacity: 0; transition: opacity var(--transition);
+      text-align: center; letter-spacing: 0.04em; padding: 8px;
+    }
+    .creator-avatar:hover .creator-upload-hint { opacity: 1; }
+    .creator-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px; font-weight: 700; color: var(--text-primary);
+    }
+    .creator-reg {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+      color: var(--accent); font-family: monospace;
+      background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.15);
+      padding: 3px 10px; border-radius: 50px;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border); padding: 22px 0;
+      text-align: center; color: var(--text-muted); font-size: 12.5px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .form-card { padding: 26px 20px; }
+      .fields-grid, .fields-grid-3 { grid-template-columns: 1fr 1fr; }
+      .prob-bar-row { grid-template-columns: 115px 1fr 44px; }
+      .creators-row { gap: 40px; }
+    }
+    @media (max-width: 480px) {
+      .fields-grid, .fields-grid-3 { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 30px; }
+      .stats-row { gap: 20px; }
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(251,191,36,0.15); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🔬</div>
+        <div>
+          <div class="logo-text">UrineIQ</div>
+          <div class="logo-tagline">Health Analysis Tool</div>
+        </div>
+      </div>
+      <div class="badge">🏥 Urine Biomarker Predictor</div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<main>
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill"><div class="dot"></div>Biomarker-Based Analysis</div>
+      <h1>Urine Health <span>Condition Analyzer</span></h1>
+      <p>Enter your urine test parameters to identify potential health conditions and get personalized dietary recommendations.</p>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">5</div><div class="stat-label">Conditions Detected</div></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><div class="stat-val">25</div><div class="stat-label">Input Biomarkers</div></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><div class="stat-val">RF</div><div class="stat-label">Random Forest</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN FORM CARD -->
+  <section class="form-section">
+    <div class="container">
+      <div class="form-card">
+
+        <!-- TAB BAR -->
+        <div class="tab-bar">
+          <button class="tab-btn active" id="tab-form" onclick="switchTab('form')">📋 Form Input</button>
+          <button class="tab-btn" id="tab-raw" onclick="switchTab('raw')">⌨️ Raw Input</button>
+        </div>
+
+        <form id="predict-form" novalidate>
+
+          <!-- ═══ FORM TAB ═══ -->
+          <div class="tab-panel active" id="panel-form">
+            <div class="section-header">
+              <div class="section-icon yellow">📋</div>
+              <div>
+                <div class="section-title">Patient Biomarker Input</div>
+                <div class="section-sub">Fill in values from your urine/blood test report</div>
+              </div>
+            </div>
+
+            <div class="form-divider">🧍 Basic Info</div>
+            <div class="fields-grid">
+              <div class="field-group">
+                <label for="age">Age <span class="tip" data-tip="Patient age in years">?</span></label>
+                <input id="age" name="age" type="number" placeholder="e.g. 45" min="1" max="110" step="1" value="45"/>
+              </div>
+              <div class="field-group">
+                <label for="bp">Blood Pressure <span class="tip" data-tip="Diastolic BP in mm/Hg">?</span></label>
+                <input id="bp" name="bp" type="number" placeholder="e.g. 80" min="40" max="200" step="1" value="80"/>
+              </div>
+            </div>
+
+            <div class="form-divider">🧪 Urine Analysis</div>
+            <div class="fields-grid">
+              <div class="field-group">
+                <label for="sg">Specific Gravity <span class="tip" data-tip="Normal: 1.005–1.030">?</span></label>
+                <input id="sg" name="sg" type="number" placeholder="e.g. 1.020" min="1.000" max="1.040" step="0.001" value="1.020"/>
+              </div>
+              <div class="field-group">
+                <label for="al">Albumin <span class="tip" data-tip="0=None, scale 0–5">?</span></label>
+                <input id="al" name="al" type="number" placeholder="e.g. 0" min="0" max="5" step="1" value="0"/>
+              </div>
+              <div class="field-group">
+                <label for="su">Sugar <span class="tip" data-tip="0=None, scale 0–5">?</span></label>
+                <input id="su" name="su" type="number" placeholder="e.g. 0" min="0" max="5" step="1" value="0"/>
+              </div>
+              <div class="field-group">
+                <label for="rbc">Red Blood Cells <span class="tip" data-tip="0=Normal, 1=Abnormal">?</span></label>
+                <select id="rbc" name="rbc"><option value="0" selected>Normal</option><option value="1">Abnormal</option></select>
+              </div>
+              <div class="field-group">
+                <label for="pc">Pus Cells <span class="tip" data-tip="0=Normal, 1=Abnormal">?</span></label>
+                <select id="pc" name="pc"><option value="0" selected>Normal</option><option value="1">Abnormal</option></select>
+              </div>
+              <div class="field-group">
+                <label for="pcc">Pus Cell Clumps <span class="tip" data-tip="0=Not present, 1=Present">?</span></label>
+                <select id="pcc" name="pcc"><option value="0" selected>Not Present</option><option value="1">Present</option></select>
+              </div>
+              <div class="field-group">
+                <label for="ba">Bacteria <span class="tip" data-tip="0=Not present, 1=Present">?</span></label>
+                <select id="ba" name="ba"><option value="0" selected>Not Present</option><option value="1">Present</option></select>
+              </div>
+            </div>
+
+            <div class="form-divider">🩸 Blood Markers</div>
+            <div class="fields-grid">
+              <div class="field-group">
+                <label for="bgr">Blood Glucose <span class="tip" data-tip="Random (mg/dL) — Normal: 70–140">?</span></label>
+                <input id="bgr" name="bgr" type="number" placeholder="e.g. 100" min="50" max="500" step="1" value="100"/>
+              </div>
+              <div class="field-group">
+                <label for="bu">Blood Urea <span class="tip" data-tip="(mg/dL) — Normal: 10–40">?</span></label>
+                <input id="bu" name="bu" type="number" placeholder="e.g. 30" min="5" max="200" step="1" value="30"/>
+              </div>
+              <div class="field-group">
+                <label for="sc">Serum Creatinine <span class="tip" data-tip="(mg/dL) — Normal: 0.6–1.2">?</span></label>
+                <input id="sc" name="sc" type="number" placeholder="e.g. 1.0" min="0.1" max="20" step="0.1" value="1.0"/>
+              </div>
+              <div class="field-group">
+                <label for="sod">Sodium <span class="tip" data-tip="Serum Sodium (mEq/L) — Normal: 135–145">?</span></label>
+                <input id="sod" name="sod" type="number" placeholder="e.g. 139" min="100" max="170" step="1" value="139"/>
+              </div>
+              <div class="field-group">
+                <label for="pot">Potassium <span class="tip" data-tip="Serum Potassium (mEq/L) — Normal: 3.5–5.0">?</span></label>
+                <input id="pot" name="pot" type="number" placeholder="e.g. 4.0" min="1" max="10" step="0.1" value="4.0"/>
+              </div>
+              <div class="field-group">
+                <label for="hemo">Hemoglobin <span class="tip" data-tip="(gms) — Normal: 12–17">?</span></label>
+                <input id="hemo" name="hemo" type="number" placeholder="e.g. 14" min="3" max="20" step="0.1" value="14"/>
+              </div>
+              <div class="field-group">
+                <label for="pcv">Packed Cell Volume <span class="tip" data-tip="% — Normal: 36–50">?</span></label>
+                <input id="pcv" name="pcv" type="number" placeholder="e.g. 42" min="10" max="60" step="1" value="42"/>
+              </div>
+              <div class="field-group">
+                <label for="wc">WBC Count <span class="tip" data-tip="/cmm — Normal: 4500–11000">?</span></label>
+                <input id="wc" name="wc" type="number" placeholder="e.g. 7000" min="1000" max="30000" step="100" value="7000"/>
+              </div>
+              <div class="field-group">
+                <label for="rc">RBC Count <span class="tip" data-tip="millions/cmm — Normal: 4–6">?</span></label>
+                <input id="rc" name="rc" type="number" placeholder="e.g. 5.0" min="1" max="10" step="0.1" value="5.0"/>
+              </div>
+            </div>
+
+            <div class="form-divider">🏥 Medical History</div>
+            <div class="fields-grid-3">
+              <div class="field-group">
+                <label for="htn">Hypertension <span class="tip" data-tip="0=No, 1=Yes">?</span></label>
+                <select id="htn" name="htn"><option value="0" selected>No</option><option value="1">Yes</option></select>
+              </div>
+              <div class="field-group">
+                <label for="dm">Diabetes Mellitus <span class="tip" data-tip="0=No, 1=Yes">?</span></label>
+                <select id="dm" name="dm"><option value="0" selected>No</option><option value="1">Yes</option></select>
+              </div>
+              <div class="field-group">
+                <label for="cad">Coronary Artery Disease <span class="tip" data-tip="0=No, 1=Yes">?</span></label>
+                <select id="cad" name="cad"><option value="0" selected>No</option><option value="1">Yes</option></select>
+              </div>
+              <div class="field-group">
+                <label for="appet">Appetite <span class="tip" data-tip="0=Good, 1=Poor">?</span></label>
+                <select id="appet" name="appet"><option value="0" selected>Good</option><option value="1">Poor</option></select>
+              </div>
+              <div class="field-group">
+                <label for="pe">Pedal Edema <span class="tip" data-tip="0=No, 1=Yes">?</span></label>
+                <select id="pe" name="pe"><option value="0" selected>No</option><option value="1">Yes</option></select>
+              </div>
+              <div class="field-group">
+                <label for="ane">Anemia <span class="tip" data-tip="0=No, 1=Yes">?</span></label>
+                <select id="ane" name="ane"><option value="0" selected>No</option><option value="1">Yes</option></select>
+              </div>
+              <div class="field-group">
+                <label for="classification">CKD Classification <span class="tip" data-tip="0=No CKD, 1=CKD">?</span></label>
+                <select id="classification" name="classification"><option value="0" selected>No CKD</option><option value="1">CKD</option></select>
+              </div>
+            </div>
+          </div><!-- /panel-form -->
+
+          <!-- ═══ RAW INPUT TAB ═══ -->
+          <div class="tab-panel" id="panel-raw">
+            <div class="section-header">
+              <div class="section-icon amber">⌨️</div>
+              <div>
+                <div class="section-title">Raw Array Input</div>
+                <div class="section-sub">Paste a comma-separated list of 25 values — Python comments (#) are ignored</div>
+              </div>
+            </div>
+            <div class="raw-panel-inner">
+              <textarea
+                id="raw-input"
+                class="raw-textarea"
+                placeholder="Paste your values here, e.g.:
+45,   # age
+85,   # bp
+1.020, # sg
+0,    # al
+2,    # su
+0,0,0,0,
+180,  # bgr
+30,   # bu
+1.0,  # sc
+140,  # sodium
+4.0,  # potassium
+14,   # hemo
+42,   # pcv
+7000, # wc
+5.0,  # rc
+0,0,0,0,0,0,0"
+              ></textarea>
+              <div id="raw-parse-status"></div>
+              <div class="raw-help">
+                <div class="raw-help-title">📌 Field Order (25 values)</div>
+                <div class="raw-fields-list">
+                  <div class="raw-field-item"><span class="raw-field-idx">0</span><span>age</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">1</span><span>bp (blood pressure)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">2</span><span>sg (specific gravity)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">3</span><span>al (albumin)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">4</span><span>su (sugar)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">5</span><span>rbc (red blood cells)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">6</span><span>pc (pus cells)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">7</span><span>pcc (pus cell clumps)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">8</span><span>ba (bacteria)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">9</span><span>bgr (blood glucose)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">10</span><span>bu (blood urea)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">11</span><span>sc (serum creatinine)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">12</span><span>sod (sodium)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">13</span><span>pot (potassium)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">14</span><span>hemo (hemoglobin)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">15</span><span>pcv (packed cell volume)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">16</span><span>wc (WBC count)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">17</span><span>rc (RBC count)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">18</span><span>htn (hypertension)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">19</span><span>dm (diabetes mellitus)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">20</span><span>cad (coronary artery disease)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">21</span><span>appet (appetite)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">22</span><span>pe (pedal edema)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">23</span><span>ane (anemia)</span></div>
+                  <div class="raw-field-item"><span class="raw-field-idx">24</span><span>classification (CKD)</span></div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /panel-raw -->
+
+          <!-- BUTTONS (shared) -->
+          <div class="btn-row">
+            <button type="submit" class="btn-analyze" id="analyze-btn">
+              <span class="btn-text">🔬 Analyze</span>
+              <div class="spinner"></div>
+            </button>
+            <button type="button" class="btn-reset" id="reset-btn">↺ Reset</button>
+          </div>
+        </form>
+
+        <!-- RESULT SECTION -->
+        <div id="result-section">
+          <div class="result-banner" id="result-banner">
+            <div class="result-top">
+              <div class="result-label-wrap">
+                <div class="result-emoji" id="result-emoji"></div>
+                <div>
+                  <div class="result-condition" id="result-condition"></div>
+                  <div class="result-risk-badge" id="result-risk-badge"></div>
+                </div>
+              </div>
+            </div>
+            <div class="result-desc" id="result-desc"></div>
+          </div>
+
+          <div class="prob-section">
+            <div class="prob-title">📊 Confidence Breakdown</div>
+            <div class="prob-bars" id="prob-bars"></div>
+          </div>
+
+          <div class="diet-section">
+            <div class="diet-header">
+              <div class="diet-icon-wrap">🥗</div>
+              <div>
+                <div class="diet-title">Personalized Diet Recommendations</div>
+                <div class="diet-subtitle">Nutritional guidance tailored to the detected condition</div>
+              </div>
+            </div>
+            <div class="diet-grid" id="diet-grid"></div>
+          </div>
+
+          <div class="disclaimer">
+            <div class="disclaimer-icon">⚠️</div>
+            <div>This tool is for informational and educational purposes only. Results should not replace professional medical advice. Please consult a qualified healthcare provider before making any dietary or medical decisions.</div>
+          </div>
+        </div><!-- /result-section -->
+
+      </div><!-- /form-card -->
+    </div>
+  </section>
+
+  <!-- ═══ CREATED BY ═══ -->
+  <section class="created-by">
+    <div class="container">
+      <div class="created-by-label">Created By</div>
+      <div class="creators-row">
+
+        <!-- Creator 1 -->
+        <div class="creator-card">
+          <div class="creator-avatar" id="avatar-1" title="Click to add photo">
+            <span class="creator-avatar-placeholder">👤</span>
+            <div class="creator-upload-hint">Add Photo</div>
+            <img id="avatar-img-1" src="" alt="" style="display:none;"/>
+          </div>
+          <input type="file" id="avatar-file-1" accept="image/*" style="display:none;" onchange="loadAvatar(1, this)"/>
+          <div class="creator-name">Anirudh Reddy</div>
+          <div class="creator-reg">24BYB1004</div>
+        </div>
+
+        <!-- Creator 2 -->
+        <div class="creator-card">
+          <div class="creator-avatar" id="avatar-2" title="Click to add photo">
+            <span class="creator-avatar-placeholder">👤</span>
+            <div class="creator-upload-hint">Add Photo</div>
+            <img id="avatar-img-2" src="" alt="" style="display:none;"/>
+          </div>
+          <input type="file" id="avatar-file-2" accept="image/*" style="display:none;" onchange="loadAvatar(2, this)"/>
+          <div class="creator-name">Aadhyanth K</div>
+          <div class="creator-reg">24BYB1098</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>UrineIQ — Urine Health Analysis Tool &nbsp;·&nbsp; Random Forest Classifier &nbsp;·&nbsp; For Educational Use Only</p>
+  </div>
+</footer>
+
+<script>
+  // ─── TAB SWITCHING ───────────────────────────────────────
+  let activeTab = 'form';
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+    document.getElementById('result-section').style.display = 'none';
+  }
+
+  // ─── RAW INPUT PARSING ───────────────────────────────────
+  const FIELD_NAMES = [
+    'age','bp','sg','al','su','rbc','pc','pcc','ba',
+    'bgr','bu','sc','sod','pot','hemo','pcv','wc','rc',
+    'htn','dm','cad','appet','pe','ane','classification'
+  ];
+
+  function parseRaw(text) {
+    // Remove Python-style comments
+    const noComments = text.replace(/#[^\n]*/g, '');
+    // Strip brackets if present
+    const stripped = noComments.replace(/[\[\]]/g, '');
+    // Extract all numbers (including floats, negatives)
+    const matches = stripped.match(/-?\d+(\.\d+)?/g);
+    if (!matches) return null;
+    const nums = matches.map(Number);
+    return nums;
+  }
+
+  function rawToFormData(nums) {
+    const data = {};
+    FIELD_NAMES.forEach((name, i) => {
+      data[name] = nums[i] !== undefined ? nums[i] : 0;
+    });
+    return data;
+  }
+
+  // Live parse status
+  document.getElementById('raw-input').addEventListener('input', function() {
+    const nums = parseRaw(this.value);
+    const status = document.getElementById('raw-parse-status');
+    if (!nums || nums.length === 0) {
+      status.innerHTML = '';
+      return;
+    }
+    const color = nums.length === 25 ? '#fbbf24' : nums.length < 25 ? '#f59e0b' : '#ef4444';
+    const msg = nums.length === 25
+      ? '✅ 25 values parsed — ready to analyze'
+      : nums.length < 25
+        ? `⚠️ ${nums.length}/25 values found — need ${25 - nums.length} more`
+        : `⚠️ ${nums.length} values found — expected exactly 25`;
+    status.innerHTML = `<div style="
+      font-size:12.5px; font-weight:600; color:${color};
+      background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.15);
+      border-radius:8px; padding:9px 14px; margin-top:4px;">
+      ${msg}
+    </div>`;
+  });
+
+  // ─── FORM SUBMIT ──────────────────────────────────────────
+  const form = document.getElementById('predict-form');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const resetBtn   = document.getElementById('reset-btn');
+  const resultSection = document.getElementById('result-section');
+
+  const colorMap = {
+    "Normal":           { bg:'rgba(34,197,94,0.08)',  border:'rgba(34,197,94,0.25)',  text:'#22c55e' },
+    "High Blood Sugar": { bg:'rgba(251,191,36,0.10)', border:'rgba(251,191,36,0.3)',  text:'#fbbf24' },
+    "Kidney Stress":    { bg:'rgba(239,68,68,0.08)',  border:'rgba(239,68,68,0.25)',  text:'#ef4444' },
+    "Dehydration":      { bg:'rgba(96,165,250,0.08)', border:'rgba(96,165,250,0.25)', text:'#60a5fa' },
+    "Infection Risk":   { bg:'rgba(168,85,247,0.08)', border:'rgba(168,85,247,0.25)', text:'#a855f7' },
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    let data = {};
+    try {
+      if (activeTab === 'raw') {
+        const rawText = document.getElementById('raw-input').value.trim();
+        if (!rawText) throw new Error('Please enter raw input data.');
+        const nums = parseRaw(rawText);
+        if (!nums || nums.length < 25) {
+          throw new Error(`Expected 25 values, got ${nums ? nums.length : 0}. Check your input.`);
+        }
+        data = rawToFormData(nums);
+      } else {
+        const inputs = form.querySelectorAll('input[name], select[name]');
+        inputs.forEach(el => { data[el.name] = el.value; });
+      }
+
+      const res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      renderResult(json);
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    form.reset();
+    document.getElementById('raw-input').value = '';
+    document.getElementById('raw-parse-status').innerHTML = '';
+    resultSection.style.display = 'none';
+  });
+
+  function setLoading(state) {
+    analyzeBtn.classList.toggle('loading', state);
+    analyzeBtn.disabled = state;
+  }
+
+  function renderResult(data) {
+    const { label, risk, diet, probabilities } = data;
+    const c = colorMap[label] || colorMap["Normal"];
+
+    const banner = document.getElementById('result-banner');
+    banner.style.background = c.bg;
+    banner.style.borderColor = c.border;
+
+    document.getElementById('result-emoji').textContent = risk.icon;
+    const condEl = document.getElementById('result-condition');
+    condEl.textContent = label;
+    condEl.style.color = c.text;
+
+    const badge = document.getElementById('result-risk-badge');
+    badge.textContent = `Risk Level: ${risk.level}`;
+    badge.style.color = c.text;
+    badge.style.borderColor = c.border;
+    badge.style.background = c.bg;
+
+    document.getElementById('result-desc').textContent = risk.desc;
+
+    // Probability bars
+    const barsEl = document.getElementById('prob-bars');
+    barsEl.innerHTML = '';
+    const sorted = Object.entries(probabilities).sort((a, b) => b[1] - a[1]);
+    sorted.forEach(([cond, pct], i) => {
+      const row = document.createElement('div');
+      row.className = 'prob-bar-row';
+      row.innerHTML = `
+        <div class="prob-bar-label">${cond}</div>
+        <div class="prob-bar-track"><div class="prob-bar-fill" id="bar-${i}"></div></div>
+        <div class="prob-bar-pct">${pct}%</div>`;
+      barsEl.appendChild(row);
+      setTimeout(() => { document.getElementById(`bar-${i}`).style.width = pct + '%'; }, 100 + i * 60);
+    });
+
+    // Diet items
+    const dietGrid = document.getElementById('diet-grid');
+    dietGrid.innerHTML = '';
+    diet.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'diet-item';
+      el.style.animationDelay = (i * 0.065) + 's';
+      el.textContent = item;
+      dietGrid.appendChild(el);
+    });
+
+    resultSection.style.display = 'block';
+    setTimeout(() => resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  }
+
+  // ─── AVATAR UPLOAD ────────────────────────────────────────
+  document.getElementById('avatar-1').addEventListener('click', () => document.getElementById('avatar-file-1').click());
+  document.getElementById('avatar-2').addEventListener('click', () => document.getElementById('avatar-file-2').click());
+
+  function loadAvatar(n, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.getElementById('avatar-img-' + n);
+      img.src = e.target.result;
+      img.style.display = 'block';
+      const placeholder = document.querySelector(`#avatar-${n} .creator-avatar-placeholder`);
+      if (placeholder) placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
+</body>
+</html>
