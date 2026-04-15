@@ -1,3 +1,4 @@
-flask==2.2.0
+flask>=3.0.0
+werkzeug>=3.0.0
 numpy
 scikit-learn
