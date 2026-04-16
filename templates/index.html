@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>UrineIQ — Urine Health Analyzer</title>
-  <meta name="description" content="Urine health analyzer that predicts health conditions and provides personalized diet recommendations based on urine biomarkers."/>
+  <title>BioIQ — Urine & Stool Health Analyzer</title>
+  <meta name="description" content="Dual health analyzer using urine biomarkers and stool indicators to predict health conditions and provide personalized diet recommendations."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
@@ -28,6 +28,11 @@
       --gradient-hero: linear-gradient(135deg, #050d08 0%, #071108 50%, #050d08 100%);
       --shadow-card: 0 4px 24px rgba(0,0,0,0.5);
       --shadow-glow: 0 0 40px rgba(110,207,146,0.12);
+      /* Stool accent — warm amber/brown */
+      --stool-accent: #d97706;
+      --stool-accent-light: #fbbf24;
+      --stool-gradient: linear-gradient(135deg, #d97706, #92400e);
+      --stool-glow: 0 0 40px rgba(217,119,6,0.12);
       --radius: 16px;
       --radius-sm: 10px;
       --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -55,6 +60,7 @@
     .orb-1 { width: 600px; height: 600px; background: #2e8a52; top: -200px; left: -200px; animation-delay: 0s; }
     .orb-2 { width: 450px; height: 450px; background: #52c27a; top: 300px; right: -180px; animation-delay: -8s; }
     .orb-3 { width: 380px; height: 380px; background: #6ecf92; bottom: -80px; left: 30%; animation-delay: -15s; }
+    .orb-4 { width: 320px; height: 320px; background: #d97706; bottom: 40%; right: 10%; animation-delay: -5s; opacity: 0.07; }
     @keyframes float {
       0%,100% { transform: translateY(0) scale(1); }
       33% { transform: translateY(-28px) scale(1.05); }
@@ -66,7 +72,7 @@
 
     /* ─── HEADER ─── */
     header { padding: 28px 0 20px; border-bottom: 1px solid var(--border); }
-    .header-inner { display: flex; align-items: center; justify-content: space-between; }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .logo { display: flex; align-items: center; gap: 12px; }
     .logo-icon {
       width: 42px; height: 42px;
@@ -82,10 +88,15 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .logo-tagline { font-size: 11px; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    .header-badges { display: flex; gap: 8px; flex-wrap: wrap; }
     .badge {
       font-size: 11px; padding: 5px 12px; border-radius: 50px;
       background: rgba(110,207,146,0.08); border: 1px solid rgba(110,207,146,0.2);
       color: #6ecf92; font-weight: 500; letter-spacing: 0.04em;
+    }
+    .badge.amber {
+      background: rgba(217,119,6,0.08); border-color: rgba(217,119,6,0.2);
+      color: #fbbf24;
     }
 
     /* ─── HERO ─── */
@@ -105,22 +116,29 @@
       font-size: clamp(34px, 5.5vw, 56px); font-weight: 700; line-height: 1.1;
       margin-bottom: 18px; animation: fadeUp 0.7s ease 0.1s both;
     }
-    .hero h1 span {
+    .hero h1 .green {
+      background: linear-gradient(135deg, #6ecf92, #52c27a);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero h1 .amber {
       background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .hero p {
-      font-size: 17px; color: var(--text-secondary); max-width: 520px;
+      font-size: 17px; color: var(--text-secondary); max-width: 560px;
       margin: 0 auto 38px; animation: fadeUp 0.7s ease 0.2s both; line-height: 1.7;
     }
     .stats-row {
       display: flex; align-items: center; justify-content: center; gap: 40px;
-      animation: fadeUp 0.7s ease 0.3s both;
+      animation: fadeUp 0.7s ease 0.3s both; flex-wrap: wrap;
     }
     .stat { text-align: center; }
     .stat-val {
       font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700;
       background: var(--gradient-btn); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-val.amber {
+      background: var(--stool-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     .stat-divider { width: 1px; height: 38px; background: var(--border); }
@@ -128,14 +146,33 @@
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
     @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
 
+    /* ─── SECTION LABEL ─── */
+    .classifier-label {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    }
+    .classifier-label-line { flex: 1; height: 1px; background: var(--border); }
+    .classifier-label-text {
+      font-size: 11.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 6px 18px; border-radius: 50px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .classifier-label-text.green {
+      background: rgba(110,207,146,0.07); border: 1px solid rgba(110,207,146,0.18); color: var(--accent);
+    }
+    .classifier-label-text.amber {
+      background: rgba(217,119,6,0.07); border: 1px solid rgba(217,119,6,0.18); color: var(--stool-accent-light);
+    }
+
     /* ─── FORM CARD ─── */
-    .form-section { padding: 0 0 60px; }
+    .form-section { padding: 0 0 40px; }
     .form-card {
       background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px;
       padding: 40px 44px; backdrop-filter: blur(20px);
       box-shadow: var(--shadow-card); transition: box-shadow var(--transition);
     }
     .form-card:hover { box-shadow: var(--shadow-glow); }
+    .form-card.stool { margin-top: 32px; }
+    .form-card.stool:hover { box-shadow: var(--stool-glow); }
 
     /* ─── TAB SWITCHER ─── */
     .tab-bar {
@@ -164,8 +201,8 @@
       width: 42px; height: 42px; border-radius: var(--radius-sm);
       display: flex; align-items: center; justify-content: center; font-size: 19px;
     }
-    .section-icon.yellow { background: rgba(110,207,146,0.12); }
-    .section-icon.amber  { background: rgba(82,194,122,0.12); }
+    .section-icon.green { background: rgba(110,207,146,0.12); }
+    .section-icon.amber { background: rgba(217,119,6,0.12); }
     .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; }
     .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
@@ -179,10 +216,12 @@
     .form-divider::before {
       content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--gradient-btn);
     }
+    .form-divider.amber::before { background: var(--stool-gradient); }
 
     /* ─── FIELDS ─── */
     .fields-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr)); gap: 15px; }
     .fields-grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px,1fr)); gap: 15px; }
+    .fields-grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 15px; }
     .field-group { display: flex; flex-direction: column; gap: 7px; }
     label {
       font-size: 11.5px; font-weight: 600; color: var(--text-secondary);
@@ -215,6 +254,10 @@
     input:focus, select:focus, textarea:focus {
       border-color: var(--accent); background: rgba(110,207,146,0.05);
       box-shadow: 0 0 0 3px rgba(110,207,146,0.1);
+    }
+    .stool-form input:focus, .stool-form select:focus {
+      border-color: var(--stool-accent); background: rgba(217,119,6,0.05);
+      box-shadow: 0 0 0 3px rgba(217,119,6,0.1);
     }
     input::placeholder, textarea::placeholder { color: var(--text-muted); }
     select { cursor: pointer; -moz-appearance: none; -webkit-appearance: none; appearance: none; }
@@ -252,12 +295,17 @@
       transition: transform var(--transition), box-shadow var(--transition);
       box-shadow: 0 4px 20px rgba(110,207,146,0.25);
     }
+    .btn-analyze.stool-btn {
+      background: var(--stool-gradient);
+      box-shadow: 0 4px 20px rgba(217,119,6,0.25);
+    }
     .btn-analyze::before {
       content: ''; position: absolute; inset: 0;
       background: rgba(255,255,255,0); transition: background var(--transition);
     }
     .btn-analyze:hover::before { background: rgba(255,255,255,0.12); }
     .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(251,191,36,0.4); }
+    .btn-analyze.stool-btn:hover { box-shadow: 0 8px 28px rgba(217,119,6,0.45); }
     .btn-analyze:active { transform: translateY(0); }
     .btn-reset {
       padding: 15px 20px; border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -276,7 +324,7 @@
     .loading .spinner { display: block; }
 
     /* ─── RESULT SECTION ─── */
-    #result-section { margin-top: 40px; display: none; animation: slideUp 0.5s ease; }
+    .result-section { margin-top: 40px; display: none; animation: slideUp 0.5s ease; }
     @keyframes slideUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
 
     .result-banner {
@@ -313,6 +361,7 @@
       width: 46px; height: 46px; background: rgba(110,207,146,0.1);
       border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px;
     }
+    .diet-icon-wrap.amber { background: rgba(217,119,6,0.1); }
     .diet-title { font-family: 'Space Grotesk', sans-serif; font-size: 19px; font-weight: 700; }
     .diet-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
     .diet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 12px; }
@@ -327,7 +376,31 @@
     .diet-item:hover {
       background: rgba(110,207,146,0.05); border-color: rgba(110,207,146,0.15); transform: translateX(4px);
     }
+    .diet-item.amber:hover {
+      background: rgba(217,119,6,0.05); border-color: rgba(217,119,6,0.15);
+    }
     @keyframes dietIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ─── STOOL SLIDER ─── */
+    .slider-group { display: flex; flex-direction: column; gap: 9px; }
+    .slider-row { display: flex; align-items: center; gap: 12px; }
+    input[type="range"] {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 5px; border-radius: 50px;
+      background: rgba(255,255,255,0.08);
+      outline: none; cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--stool-gradient); cursor: pointer;
+      box-shadow: 0 2px 8px rgba(217,119,6,0.4);
+      transition: transform 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .slider-val {
+      min-width: 36px; text-align: right; font-size: 14px; font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif; color: var(--stool-accent-light);
+    }
 
     /* ─── DISCLAIMER ─── */
     .disclaimer {
@@ -372,10 +445,7 @@
       width: 100%; height: 100%; object-fit: cover;
       position: absolute; inset: 0;
     }
-    .creator-avatar-placeholder {
-      font-size: 36px;
-      user-select: none;
-    }
+    .creator-avatar-placeholder { font-size: 36px; user-select: none; }
     .creator-upload-hint {
       position: absolute; inset: 0;
       background: rgba(12,10,4,0.6);
@@ -405,12 +475,12 @@
     /* ─── RESPONSIVE ─── */
     @media (max-width: 768px) {
       .form-card { padding: 26px 20px; }
-      .fields-grid, .fields-grid-3 { grid-template-columns: 1fr 1fr; }
+      .fields-grid, .fields-grid-3, .fields-grid-2 { grid-template-columns: 1fr 1fr; }
       .prob-bar-row { grid-template-columns: 115px 1fr 44px; }
       .creators-row { gap: 40px; }
     }
     @media (max-width: 480px) {
-      .fields-grid, .fields-grid-3 { grid-template-columns: 1fr; }
+      .fields-grid, .fields-grid-3, .fields-grid-2 { grid-template-columns: 1fr; }
       .hero h1 { font-size: 30px; }
       .stats-row { gap: 20px; }
     }
@@ -425,6 +495,7 @@
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
 </div>
 
 <!-- HEADER -->
@@ -434,11 +505,14 @@
       <div class="logo">
         <div class="logo-icon">🔬</div>
         <div>
-          <div class="logo-text">UrineIQ</div>
+          <div class="logo-text">BioIQ</div>
           <div class="logo-tagline">Health Analysis Tool</div>
         </div>
       </div>
-      <div class="badge">🏥 Urine Biomarker Predictor</div>
+      <div class="header-badges">
+        <div class="badge">💧 Urine Biomarker Predictor</div>
+        <div class="badge amber">🪱 Stool Health Analyzer</div>
+      </div>
     </div>
   </div>
 </header>
@@ -447,24 +521,32 @@
 <main>
   <section class="hero">
     <div class="container">
-      <div class="hero-pill"><div class="dot"></div>Biomarker-Based Analysis</div>
-      <h1>Urine Health <span>Condition Analyzer</span></h1>
-      <p>Enter your urine test parameters to identify potential health conditions and get personalized dietary recommendations.</p>
+      <div class="hero-pill"><div class="dot"></div>Dual Biomarker Analysis</div>
+      <h1>Urine <span class="green">&</span> Stool <span class="amber">Health Analyzer</span></h1>
+      <p>Enter your biomarker and stool parameters to identify potential health conditions and receive personalized dietary recommendations.</p>
       <div class="stats-row">
-        <div class="stat"><div class="stat-val">5</div><div class="stat-label">Conditions Detected</div></div>
+        <div class="stat"><div class="stat-val">5</div><div class="stat-label">Urine Conditions</div></div>
         <div class="stat-divider"></div>
-        <div class="stat"><div class="stat-val">25</div><div class="stat-label">Input Biomarkers</div></div>
+        <div class="stat"><div class="stat-val amber">5</div><div class="stat-label">Stool Conditions</div></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><div class="stat-val">25</div><div class="stat-label">Urine Biomarkers</div></div>
         <div class="stat-divider"></div>
         <div class="stat"><div class="stat-val">RF</div><div class="stat-label">Random Forest</div></div>
       </div>
     </div>
   </section>
 
-  <!-- MAIN FORM CARD -->
   <section class="form-section">
     <div class="container">
-      <div class="form-card">
 
+      <!-- ═══ URINE CLASSIFIER ═══ -->
+      <div class="classifier-label">
+        <div class="classifier-label-line"></div>
+        <div class="classifier-label-text green">💧 Urine Classifier</div>
+        <div class="classifier-label-line"></div>
+      </div>
+
+      <div class="form-card">
         <!-- TAB BAR -->
         <div class="tab-bar">
           <button class="tab-btn active" id="tab-form" onclick="switchTab('form')">📋 Form Input</button>
@@ -476,7 +558,7 @@
           <!-- ═══ FORM TAB ═══ -->
           <div class="tab-panel active" id="panel-form">
             <div class="section-header">
-              <div class="section-icon yellow">📋</div>
+              <div class="section-icon green">📋</div>
               <div>
                 <div class="section-title">Patient Biomarker Input</div>
                 <div class="section-sub">Fill in values from your urine/blood test report</div>
@@ -668,15 +750,15 @@
           <!-- BUTTONS (shared) -->
           <div class="btn-row">
             <button type="submit" class="btn-analyze" id="analyze-btn">
-              <span class="btn-text">🔬 Analyze</span>
+              <span class="btn-text">💧 Analyze Urine</span>
               <div class="spinner"></div>
             </button>
             <button type="button" class="btn-reset" id="reset-btn">↺ Reset</button>
           </div>
         </form>
 
-        <!-- RESULT SECTION -->
-        <div id="result-section">
+        <!-- URINE RESULT SECTION -->
+        <div class="result-section" id="urine-result-section">
           <div class="result-banner" id="result-banner">
             <div class="result-top">
               <div class="result-label-wrap">
@@ -700,7 +782,7 @@
               <div class="diet-icon-wrap">🥗</div>
               <div>
                 <div class="diet-title">Personalized Diet Recommendations</div>
-                <div class="diet-subtitle">Nutritional guidance tailored to the detected condition</div>
+                <div class="diet-subtitle">Nutritional guidance tailored to the detected urine condition</div>
               </div>
             </div>
             <div class="diet-grid" id="diet-grid"></div>
@@ -710,9 +792,149 @@
             <div class="disclaimer-icon">⚠️</div>
             <div>This tool is for informational and educational purposes only. Results should not replace professional medical advice. Please consult a qualified healthcare provider before making any dietary or medical decisions.</div>
           </div>
-        </div><!-- /result-section -->
+        </div><!-- /urine-result-section -->
 
-      </div><!-- /form-card -->
+      </div><!-- /form-card urine -->
+
+      <!-- ═══ STOOL CLASSIFIER ═══ -->
+      <div class="classifier-label" style="margin-top:48px;">
+        <div class="classifier-label-line"></div>
+        <div class="classifier-label-text amber">🪱 Stool Classifier</div>
+        <div class="classifier-label-line"></div>
+      </div>
+
+      <div class="form-card stool">
+        <div class="section-header">
+          <div class="section-icon amber">🔬</div>
+          <div>
+            <div class="section-title">Stool Health Indicator Input</div>
+            <div class="section-sub">Describe your stool characteristics to detect digestive conditions</div>
+          </div>
+        </div>
+
+        <form id="stool-form" class="stool-form" novalidate>
+
+          <div class="form-divider amber">💧 Stool Consistency</div>
+          <div class="fields-grid-2">
+            <div class="field-group slider-group">
+              <label for="water_content">Water Content % <span class="tip" data-tip="Normal: ~70–75%. >75% = loose/watery">?</span></label>
+              <div class="slider-row">
+                <input type="range" id="water_content" name="water_content" min="10" max="100" step="1" value="50"
+                  oninput="document.getElementById('wc_val').textContent=this.value+'%'"/>
+                <span class="slider-val" id="wc_val">50%</span>
+              </div>
+            </div>
+            <div class="field-group slider-group">
+              <label for="stool_hardness">Stool Hardness (1–10) <span class="tip" data-tip="1=very soft, 10=very hard. ≥8 with low frequency = constipation">?</span></label>
+              <div class="slider-row">
+                <input type="range" id="stool_hardness" name="stool_hardness" min="1" max="10" step="1" value="5"
+                  oninput="document.getElementById('hard_val').textContent=this.value"/>
+                <span class="slider-val" id="hard_val">5</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-divider amber">📅 Frequency & Symptoms</div>
+          <div class="fields-grid-2">
+            <div class="field-group">
+              <label for="frequency">Bowel Movements / Day <span class="tip" data-tip="Normal: 1–2. ≥3 watery = diarrhea. ≤1 hard = constipation">?</span></label>
+              <input id="frequency" name="frequency" type="number" placeholder="e.g. 1" min="0" max="15" step="1" value="1"/>
+            </div>
+            <div class="field-group">
+              <label for="urgency">Urgency <span class="tip" data-tip="0=No urgency, 1=Sudden urge to go">?</span></label>
+              <select id="urgency" name="urgency">
+                <option value="0" selected>No urgency</option>
+                <option value="1">Sudden urgency</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-divider amber">🩸 Visible Indicators</div>
+          <div class="fields-grid-2">
+            <div class="field-group">
+              <label for="blood">Blood in Stool <span class="tip" data-tip="1=Present. Strongly indicates GI infection or other condition">?</span></label>
+              <select id="s_blood" name="blood">
+                <option value="0" selected>No blood</option>
+                <option value="1">Blood present</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="mucus">Mucus in Stool <span class="tip" data-tip="1=Present. Combined with pain suggests GI infection">?</span></label>
+              <select id="s_mucus" name="mucus">
+                <option value="0" selected>No mucus</option>
+                <option value="1">Mucus present</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="pain">Abdominal Pain <span class="tip" data-tip="1=Yes. Combined with mucus indicates GI infection">?</span></label>
+              <select id="s_pain" name="pain">
+                <option value="0" selected>No pain</option>
+                <option value="1">Pain present</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-divider amber">🔬 Malabsorption Indicators</div>
+          <div class="fields-grid-2">
+            <div class="field-group">
+              <label for="undigested_food">Undigested Food <span class="tip" data-tip="1=Visible undigested food particles in stool">?</span></label>
+              <select id="s_undigested" name="undigested_food">
+                <option value="0" selected>Not visible</option>
+                <option value="1">Visible</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="foul_smell">Foul / Unusually Strong Odor <span class="tip" data-tip="1=Yes. Combined with undigested food suggests malabsorption">?</span></label>
+              <select id="s_smell" name="foul_smell">
+                <option value="0" selected>Normal odor</option>
+                <option value="1">Foul / strong odor</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" class="btn-analyze stool-btn" id="stool-analyze-btn">
+              <span class="btn-text">🔬 Analyze Stool</span>
+              <div class="spinner"></div>
+            </button>
+            <button type="button" class="btn-reset" id="stool-reset-btn">↺ Reset</button>
+          </div>
+        </form>
+
+        <!-- STOOL RESULT SECTION -->
+        <div class="result-section" id="stool-result-section">
+          <div class="result-banner" id="stool-result-banner">
+            <div class="result-top">
+              <div class="result-label-wrap">
+                <div class="result-emoji" id="stool-result-emoji"></div>
+                <div>
+                  <div class="result-condition" id="stool-result-condition"></div>
+                  <div class="result-risk-badge" id="stool-result-risk-badge"></div>
+                </div>
+              </div>
+            </div>
+            <div class="result-desc" id="stool-result-desc"></div>
+          </div>
+
+          <div class="diet-section">
+            <div class="diet-header">
+              <div class="diet-icon-wrap amber">🥗</div>
+              <div>
+                <div class="diet-title">Personalized Diet Recommendations</div>
+                <div class="diet-subtitle">Nutritional guidance tailored to the detected stool condition</div>
+              </div>
+            </div>
+            <div class="diet-grid" id="stool-diet-grid"></div>
+          </div>
+
+          <div class="disclaimer">
+            <div class="disclaimer-icon">⚠️</div>
+            <div>Stool classification is rule-based and for educational purposes only. Persistent symptoms — especially blood in stool — require immediate medical evaluation. Do not self-diagnose or self-medicate.</div>
+          </div>
+        </div><!-- /stool-result-section -->
+
+      </div><!-- /form-card stool -->
+
     </div>
   </section>
 
@@ -748,12 +970,12 @@
 <!-- FOOTER -->
 <footer>
   <div class="container">
-    <p>UrineIQ — Urine Health Analysis Tool &nbsp;·&nbsp; Random Forest Classifier &nbsp;·&nbsp; For Educational Use Only</p>
+    <p>BioIQ — Urine &amp; Stool Health Analysis Tool &nbsp;·&nbsp; Random Forest (Urine) + Rule-Based (Stool) &nbsp;·&nbsp; For Educational Use Only</p>
   </div>
 </footer>
 
 <script>
-  // ─── TAB SWITCHING ───────────────────────────────────────
+  // ─── URINE: TAB SWITCHING ────────────────────────────────────────────────────
   let activeTab = 'form';
   function switchTab(tab) {
     activeTab = tab;
@@ -761,10 +983,10 @@
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
     document.getElementById('panel-' + tab).classList.add('active');
-    document.getElementById('result-section').style.display = 'none';
+    document.getElementById('urine-result-section').style.display = 'none';
   }
 
-  // ─── RAW INPUT PARSING ───────────────────────────────────
+  // ─── URINE: RAW INPUT PARSING ────────────────────────────────────────────────
   const FIELD_NAMES = [
     'age','bp','sg','al','su','rbc','pc','pcc','ba',
     'bgr','bu','sc','sod','pot','hemo','pcv','wc','rc',
@@ -772,15 +994,11 @@
   ];
 
   function parseRaw(text) {
-    // Remove Python-style comments
     const noComments = text.replace(/#[^\n]*/g, '');
-    // Strip brackets if present
     const stripped = noComments.replace(/[\[\]]/g, '');
-    // Extract all numbers (including floats, negatives)
     const matches = stripped.match(/-?\d+(\.\d+)?/g);
     if (!matches) return null;
-    const nums = matches.map(Number);
-    return nums;
+    return matches.map(Number);
   }
 
   function rawToFormData(nums) {
@@ -791,35 +1009,21 @@
     return data;
   }
 
-  // Live parse status
   document.getElementById('raw-input').addEventListener('input', function() {
     const nums = parseRaw(this.value);
     const status = document.getElementById('raw-parse-status');
-    if (!nums || nums.length === 0) {
-      status.innerHTML = '';
-      return;
-    }
+    if (!nums || nums.length === 0) { status.innerHTML = ''; return; }
     const color = nums.length === 25 ? '#fbbf24' : nums.length < 25 ? '#f59e0b' : '#ef4444';
     const msg = nums.length === 25
       ? '✅ 25 values parsed — ready to analyze'
       : nums.length < 25
         ? `⚠️ ${nums.length}/25 values found — need ${25 - nums.length} more`
         : `⚠️ ${nums.length} values found — expected exactly 25`;
-    status.innerHTML = `<div style="
-      font-size:12.5px; font-weight:600; color:${color};
-      background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.15);
-      border-radius:8px; padding:9px 14px; margin-top:4px;">
-      ${msg}
-    </div>`;
+    status.innerHTML = `<div style="font-size:12.5px;font-weight:600;color:${color};background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:8px;padding:9px 14px;margin-top:4px;">${msg}</div>`;
   });
 
-  // ─── FORM SUBMIT ──────────────────────────────────────────
-  const form = document.getElementById('predict-form');
-  const analyzeBtn = document.getElementById('analyze-btn');
-  const resetBtn   = document.getElementById('reset-btn');
-  const resultSection = document.getElementById('result-section');
-
-  const colorMap = {
+  // ─── URINE: COLOR MAP ────────────────────────────────────────────────────────
+  const urineColorMap = {
     "Normal":           { bg:'rgba(34,197,94,0.08)',  border:'rgba(34,197,94,0.25)',  text:'#22c55e' },
     "High Blood Sugar": { bg:'rgba(251,191,36,0.10)', border:'rgba(251,191,36,0.3)',  text:'#fbbf24' },
     "Kidney Stress":    { bg:'rgba(239,68,68,0.08)',  border:'rgba(239,68,68,0.25)',  text:'#ef4444' },
@@ -827,55 +1031,51 @@
     "Infection Risk":   { bg:'rgba(168,85,247,0.08)', border:'rgba(168,85,247,0.25)', text:'#a855f7' },
   };
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  // ─── URINE: FORM SUBMIT ──────────────────────────────────────────────────────
+  const urineForm = document.getElementById('predict-form');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const resetBtn   = document.getElementById('reset-btn');
+  const urineResultSection = document.getElementById('urine-result-section');
 
+  urineForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setUrineLoading(true);
     let data = {};
     try {
       if (activeTab === 'raw') {
         const rawText = document.getElementById('raw-input').value.trim();
         if (!rawText) throw new Error('Please enter raw input data.');
         const nums = parseRaw(rawText);
-        if (!nums || nums.length < 25) {
-          throw new Error(`Expected 25 values, got ${nums ? nums.length : 0}. Check your input.`);
-        }
+        if (!nums || nums.length < 25) throw new Error(`Expected 25 values, got ${nums ? nums.length : 0}.`);
         data = rawToFormData(nums);
       } else {
-        const inputs = form.querySelectorAll('input[name], select[name]');
-        inputs.forEach(el => { data[el.name] = el.value; });
+        urineForm.querySelectorAll('input[name], select[name]').forEach(el => { data[el.name] = el.value; });
       }
-
       const res = await fetch('/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
       });
       const json = await res.json();
       if (json.error) throw new Error(json.error);
-      renderResult(json);
-    } catch (err) {
-      alert('Error: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+      renderUrineResult(json);
+    } catch (err) { alert('Error: ' + err.message); }
+    finally { setUrineLoading(false); }
   });
 
   resetBtn.addEventListener('click', () => {
-    form.reset();
+    urineForm.reset();
     document.getElementById('raw-input').value = '';
     document.getElementById('raw-parse-status').innerHTML = '';
-    resultSection.style.display = 'none';
+    urineResultSection.style.display = 'none';
   });
 
-  function setLoading(state) {
+  function setUrineLoading(state) {
     analyzeBtn.classList.toggle('loading', state);
     analyzeBtn.disabled = state;
   }
 
-  function renderResult(data) {
+  function renderUrineResult(data) {
     const { label, risk, diet, probabilities } = data;
-    const c = colorMap[label] || colorMap["Normal"];
+    const c = urineColorMap[label] || urineColorMap["Normal"];
 
     const banner = document.getElementById('result-banner');
     banner.style.background = c.bg;
@@ -903,10 +1103,10 @@
       row.className = 'prob-bar-row';
       row.innerHTML = `
         <div class="prob-bar-label">${cond}</div>
-        <div class="prob-bar-track"><div class="prob-bar-fill" id="bar-${i}"></div></div>
+        <div class="prob-bar-track"><div class="prob-bar-fill" id="ubar-${i}"></div></div>
         <div class="prob-bar-pct">${pct}%</div>`;
       barsEl.appendChild(row);
-      setTimeout(() => { document.getElementById(`bar-${i}`).style.width = pct + '%'; }, 100 + i * 60);
+      setTimeout(() => { document.getElementById(`ubar-${i}`).style.width = pct + '%'; }, 100 + i * 60);
     });
 
     // Diet items
@@ -920,13 +1120,101 @@
       dietGrid.appendChild(el);
     });
 
-    resultSection.style.display = 'block';
-    setTimeout(() => resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    urineResultSection.style.display = 'block';
+    setTimeout(() => urineResultSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   }
 
-  // ─── AVATAR UPLOAD ────────────────────────────────────────
-  document.getElementById('avatar-1').addEventListener('click', () => document.getElementById('avatar-file-1').click());
-  document.getElementById('avatar-2').addEventListener('click', () => document.getElementById('avatar-file-2').click());
+  // ─── STOOL: COLOR MAP ────────────────────────────────────────────────────────
+  const stoolColorMap = {
+    "Normal":                    { bg:'rgba(34,197,94,0.08)',  border:'rgba(34,197,94,0.25)',  text:'#22c55e' },
+    "Constipation":              { bg:'rgba(251,191,36,0.10)', border:'rgba(251,191,36,0.3)',  text:'#fbbf24' },
+    "Diarrhea":                  { bg:'rgba(96,165,250,0.08)', border:'rgba(96,165,250,0.25)', text:'#60a5fa' },
+    "Gastrointestinal Infection":{ bg:'rgba(239,68,68,0.08)',  border:'rgba(239,68,68,0.25)',  text:'#ef4444' },
+    "Malabsorption Syndrome":    { bg:'rgba(168,85,247,0.08)', border:'rgba(168,85,247,0.25)', text:'#a855f7' },
+  };
+
+  // ─── STOOL: FORM SUBMIT ──────────────────────────────────────────────────────
+  const stoolForm = document.getElementById('stool-form');
+  const stoolAnalyzeBtn = document.getElementById('stool-analyze-btn');
+  const stoolResetBtn   = document.getElementById('stool-reset-btn');
+  const stoolResultSection = document.getElementById('stool-result-section');
+
+  stoolForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setStoolLoading(true);
+    try {
+      const data = {
+        water_content:   parseFloat(document.getElementById('water_content').value),
+        stool_hardness:  parseFloat(document.getElementById('stool_hardness').value),
+        frequency:       parseFloat(document.getElementById('frequency').value),
+        urgency:         parseInt(document.getElementById('urgency').value),
+        blood:           parseInt(document.getElementById('s_blood').value),
+        mucus:           parseInt(document.getElementById('s_mucus').value),
+        pain:            parseInt(document.getElementById('s_pain').value),
+        undigested_food: parseInt(document.getElementById('s_undigested').value),
+        foul_smell:      parseInt(document.getElementById('s_smell').value),
+      };
+      const res = await fetch('/predict-stool', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      renderStoolResult(json);
+    } catch (err) { alert('Stool Error: ' + err.message); }
+    finally { setStoolLoading(false); }
+  });
+
+  stoolResetBtn.addEventListener('click', () => {
+    stoolForm.reset();
+    document.getElementById('wc_val').textContent = '50%';
+    document.getElementById('hard_val').textContent = '5';
+    stoolResultSection.style.display = 'none';
+  });
+
+  function setStoolLoading(state) {
+    stoolAnalyzeBtn.classList.toggle('loading', state);
+    stoolAnalyzeBtn.disabled = state;
+  }
+
+  function renderStoolResult(data) {
+    const { label, risk, diet } = data;
+    const c = stoolColorMap[label] || stoolColorMap["Normal"];
+
+    const banner = document.getElementById('stool-result-banner');
+    banner.style.background = c.bg;
+    banner.style.borderColor = c.border;
+
+    document.getElementById('stool-result-emoji').textContent = risk.icon;
+    const condEl = document.getElementById('stool-result-condition');
+    condEl.textContent = label;
+    condEl.style.color = c.text;
+
+    const badge = document.getElementById('stool-result-risk-badge');
+    badge.textContent = `Risk Level: ${risk.level}`;
+    badge.style.color = c.text;
+    badge.style.borderColor = c.border;
+    badge.style.background = c.bg;
+
+    document.getElementById('stool-result-desc').textContent = risk.desc;
+
+    // Diet items
+    const dietGrid = document.getElementById('stool-diet-grid');
+    dietGrid.innerHTML = '';
+    diet.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'diet-item amber';
+      el.style.animationDelay = (i * 0.065) + 's';
+      el.textContent = item;
+      dietGrid.appendChild(el);
+    });
+
+    stoolResultSection.style.display = 'block';
+    setTimeout(() => stoolResultSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  }
+
+  // ─── AVATAR UPLOAD ────────────────────────────────────────────────────────
+  document.getElementById('avatar-1').addEventListener('click', () => document.getElementById('avatar-file-1') && document.getElementById('avatar-file-1').click());
+  document.getElementById('avatar-2').addEventListener('click', () => document.getElementById('avatar-file-2') && document.getElementById('avatar-file-2').click());
 
   function loadAvatar(n, input) {
     const file = input.files[0];
@@ -934,10 +1222,7 @@
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = document.getElementById('avatar-img-' + n);
-      img.src = e.target.result;
-      img.style.display = 'block';
-      const placeholder = document.querySelector(`#avatar-${n} .creator-avatar-placeholder`);
-      if (placeholder) placeholder.style.display = 'none';
+      if (img) { img.src = e.target.result; img.style.display = 'block'; }
     };
     reader.readAsDataURL(file);
   }

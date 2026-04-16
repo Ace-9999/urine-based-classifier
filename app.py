@@ -7,11 +7,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
-# Load model
+# Load urine ML model
 with open(os.path.join(BASE_DIR, "model.pkl"), "rb") as f:
     model = pickle.load(f)
 
-# Class labels
+# ─── URINE CLASSIFIER ─────────────────────────────────────────────────────────
+
 labels = {
     0: "Normal",
     1: "High Blood Sugar",
@@ -20,7 +21,6 @@ labels = {
     4: "Infection Risk"
 }
 
-# Diet recommendations
 diet = {
     0: [
         "✅ Maintain a balanced, nutrient-rich diet",
@@ -83,7 +83,6 @@ diet = {
     ]
 }
 
-# Risk level info
 risk_info = {
     0: {"level": "Low", "color": "#22c55e", "icon": "✅", "desc": "Your urine parameters appear normal. Keep up your healthy habits!"},
     1: {"level": "Moderate-High", "color": "#f59e0b", "icon": "⚠️", "desc": "Elevated blood sugar detected. Early dietary intervention is key."},
@@ -91,6 +90,120 @@ risk_info = {
     3: {"level": "Moderate", "color": "#3b82f6", "icon": "💧", "desc": "Dehydration indicators detected. Increase your fluid intake immediately."},
     4: {"level": "Moderate-High", "color": "#a855f7", "icon": "🦠", "desc": "Possible infection risk. Seek medical attention and boost immunity."}
 }
+
+# ─── STOOL CLASSIFIER ─────────────────────────────────────────────────────────
+
+stool_labels = {
+    0: "Normal",
+    1: "Constipation",
+    2: "Diarrhea",
+    3: "Gastrointestinal Infection",
+    4: "Malabsorption Syndrome"
+}
+
+stool_diet = {
+    0: [
+        "✅ Your stool health appears normal — maintain your routine!",
+        "🥦 Eat a high-fiber diet: fruits, vegetables, whole grains",
+        "💧 Drink 8–10 glasses of water daily for healthy gut motility",
+        "🥛 Include probiotics: yogurt, kefir, fermented foods daily",
+        "🌾 Consume both soluble fiber (oats) and insoluble fiber (bran)",
+        "🏃 Regular exercise supports healthy bowel movements",
+        "🚫 Limit processed foods, refined sugar, and alcohol",
+        "😴 Maintain regular sleep patterns for gut rhythm"
+    ],
+    1: [
+        "💧 Dramatically increase water intake — aim for 3+ liters/day",
+        "🥑 Eat fiber-rich foods: prunes, figs, flaxseed, avocados",
+        "🌾 Switch to whole-grain bread, brown rice, and oats",
+        "🥛 Try warm milk with ghee at bedtime to soften stools",
+        "🍌 Eat ripe bananas and papaya for natural laxative effect",
+        "🚫 Avoid constipating foods: cheese, red meat, white bread",
+        "☕ Limit caffeine and alcohol which dehydrate the bowel",
+        "🏃 Walk 20–30 minutes after meals to stimulate bowel movement",
+        "🥜 Soak and eat 4–5 prunes or figs overnight for relief",
+        "🍵 Drink warm ginger or licorice root tea in the morning"
+    ],
+    2: [
+        "💧 Rehydrate immediately — use ORS (oral rehydration solution)",
+        "🍌 Eat the BRAT diet: Bananas, Rice, Applesauce, Toast",
+        "🥣 Consume bland, easily digestible foods",
+        "🚫 Avoid dairy, greasy, spicy, and high-fiber foods temporarily",
+        "🧂 Replenish electrolytes: coconut water, sports drinks",
+        "🥛 Take probiotics to restore gut flora (yogurt, supplements)",
+        "🍵 Drink chamomile or peppermint tea to soothe the gut",
+        "🚫 Avoid caffeine, alcohol, and artificial sweeteners",
+        "🍚 White rice with a pinch of salt helps bind loose stools",
+        "🌿 Psyllium husk (Isabgol) can help normalize stool consistency"
+    ],
+    3: [
+        "💊 Seek medical attention immediately — may require antibiotics",
+        "💧 Stay well-hydrated with ORS, broth, and coconut water",
+        "🚫 Avoid solid food until vomiting/diarrhea subsides",
+        "🥣 Gradually reintroduce bland foods: toast, rice, bananas",
+        "🧄 Garlic has natural antimicrobial properties — add to food",
+        "🍯 Manuka honey can help fight gut bacteria naturally",
+        "🥛 Avoid dairy products until the infection has fully resolved",
+        "😴 Rest maximally to support immune system recovery",
+        "🚫 Avoid raw foods, street food, and unfiltered water",
+        "🌿 Probiotic supplements after antibiotics to restore gut flora",
+        "🩺 Do not self-medicate — follow prescribed treatment strictly"
+    ],
+    4: [
+        "🩺 Consult a gastroenterologist for malabsorption diagnosis",
+        "🥩 Increase easily digestible protein: eggs, fish, tofu, chicken",
+        "🌾 Avoid gluten if celiac disease is suspected (wheat, rye, barley)",
+        "🥛 Consider lactose-free dairy if lactose intolerance is a factor",
+        "💊 Take fat-soluble vitamin supplements: A, D, E, K",
+        "🦴 Monitor and supplement calcium and vitamin D for bone health",
+        "🍳 Cook vegetables thoroughly to aid digestion and absorption",
+        "🥜 Eat small, frequent meals to reduce digestive burden",
+        "🚫 Avoid raw salads, high-fat foods, and alcohol",
+        "🌿 Digestive enzyme supplements may help improve absorption",
+        "🔬 Get tested for iron, B12, and folate deficiencies regularly"
+    ]
+}
+
+stool_risk_info = {
+    0: {"level": "Low", "color": "#22c55e", "icon": "✅", "desc": "Your stool indicators appear normal. Maintain your healthy diet and lifestyle."},
+    1: {"level": "Moderate", "color": "#f59e0b", "icon": "🪨", "desc": "Signs of constipation detected. Increase fiber and fluid intake."},
+    2: {"level": "Moderate", "color": "#3b82f6", "icon": "💧", "desc": "Diarrhea detected. Rehydrate immediately and follow a bland diet."},
+    3: {"level": "High", "color": "#ef4444", "icon": "🦠", "desc": "Possible gastrointestinal infection. Seek medical attention promptly."},
+    4: {"level": "Moderate-High", "color": "#a855f7", "icon": "🔬", "desc": "Signs of malabsorption syndrome. Consult a gastroenterologist for proper diagnosis."}
+}
+
+def stool_label(row):
+    wc         = float(row.get('water_content', 50))
+    freq       = float(row.get('frequency', 1))
+    hardness   = float(row.get('stool_hardness', 5))
+    mucus      = int(row.get('mucus', 0))
+    blood      = int(row.get('blood', 0))
+    pain       = int(row.get('pain', 0))
+    urgency    = int(row.get('urgency', 0))
+    undigested = int(row.get('undigested_food', 0))
+    smell      = int(row.get('foul_smell', 0))
+
+    # 1. Gastrointestinal Infection (highest priority)
+    if blood == 1 or (mucus == 1 and pain == 1):
+        return 3
+
+    # 2. Malabsorption Syndrome
+    elif undigested == 1 and smell == 1:
+        return 4
+
+    # 3. Diarrhea
+    elif wc > 75 and freq >= 3:
+        return 2
+
+    # 4. Constipation
+    elif hardness >= 8 and freq <= 1:
+        return 1
+
+    # 0. Normal
+    else:
+        return 0
+
+# ─── ROUTES ───────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
@@ -100,8 +213,7 @@ def index():
 def predict():
     try:
         data = request.get_json()
-        
-        # Extract features in correct order
+
         features = [
             float(data.get("age", 0)),
             float(data.get("bp", 0)),
@@ -129,17 +241,31 @@ def predict():
             float(data.get("ane", 0)),
             float(data.get("classification", 0)),
         ]
-        
+
         input_array = np.array([features])
         prediction = int(model.predict(input_array)[0])
         proba = model.predict_proba(input_array)[0].tolist()
-        
+
         return jsonify({
             "prediction": prediction,
             "label": labels[prediction],
             "diet": diet[prediction],
             "risk": risk_info[prediction],
             "probabilities": {labels[i]: round(p * 100, 1) for i, p in enumerate(proba)}
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route("/predict-stool", methods=["POST"])
+def predict_stool():
+    try:
+        data = request.get_json()
+        prediction = stool_label(data)
+        return jsonify({
+            "prediction": prediction,
+            "label": stool_labels[prediction],
+            "diet": stool_diet[prediction],
+            "risk": stool_risk_info[prediction]
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 400
